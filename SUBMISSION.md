@@ -22,3 +22,22 @@ uv run pytest integration-tests -m "not gpu and not langsmith" -q
 
 GPU/LangSmith là gate theo môi trường. Nếu lớp không cấp endpoint/credential, báo
 `UNVERIFIED` và dùng local evidence tương ứng; không giả lập. Xem [rubric](docs/rubric.md).
+
+## Trạng thái nộp — route 2/core
+
+| Hạng mục | Trạng thái | Bằng chứng |
+|---|---|---|
+| Fast suite và static validation | PASS | `evidence/fast-suite.txt`, `evidence/static-validation.txt` |
+| Core happy path | PASS | `evidence/core-happy-path.json` |
+| Failure/recovery + Kafka durability | PASS | `evidence/failure-recovery.json` |
+| Load P50/P95/P99 | PASS | `evidence/load-profile.json` |
+| Architecture/ownership | PASS | `docs/architecture-ownership.md` |
+| Kubernetes/GitOps contracts | PASS (static) | `evidence/kubernetes-gitops-validation.json` |
+| IP01, IP05, IP06, IP08, IP09 | PASS (live core) | các tệp đúng tên trong `evidence/` |
+| IP10 core trace leg | PASS (partial) | `evidence/ip10-trace.json` liệt kê span có/thiếu |
+| IP02, IP03, IP04 | UNVERIFIED | cần profile full: Airflow + Spark/Delta |
+| IP07 | UNVERIFIED | cần endpoint vLLM GPU thật |
+| LangSmith export | UNVERIFIED | cần `LANGSMITH_API_KEY` |
+
+Không diễn giải `UNVERIFIED` thành `PASS`: route 2 không thể tạo live evidence
+của Airflow/Delta/vLLM. Xem `ANSWERS.md` để biết trade-off và production gaps.
