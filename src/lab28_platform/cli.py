@@ -23,6 +23,7 @@ import json
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -75,6 +76,33 @@ def _read_jsonl(path: Path) -> list[dict[str, Any]]:
         for line in path.read_text(encoding="utf-8").splitlines()
         if line.strip()
     ]
+
+
+def _post_with_rate_limit_retry(
+    client: Any,
+    path: str,
+    payload: dict[str, Any],
+    *,
+    max_attempts: int = 5,
+) -> Any:
+    """Retry only an edge-rate-limit response while seeding.
+
+    The bundled corpus is intentionally larger than the gateway's one-second
+    token bucket.  A seed command is an operator batch, so it should respect
+    that policy and continue after the bucket refills; validation and server
+    failures are returned immediately and remain visible as rejected records.
+    """
+    response: Any = None
+    for attempt in range(max_attempts):
+        response = client.post(path, json=payload)
+        if response.status_code != 429 or attempt == max_attempts - 1:
+            return response
+        try:
+            retry_after = float(response.headers.get("retry-after", "1"))
+        except ValueError:
+            retry_after = 1.0
+        time.sleep(max(0.1, min(retry_after, 5.0)))
+    return response
 
 
 # --------------------------------------------------------------------------
@@ -226,7 +254,9 @@ def seed(
             selected = rows[:limit] if limit else rows
             accepted[kind], rejected[kind] = [], []
             for row in selected:
-                response = client.post(f"/api/v1/{kind}", json=row)
+                response = _post_with_rate_limit_retry(
+                    client, f"/api/v1/{kind}", row
+                )
                 target = accepted if response.status_code == 202 else rejected
                 target[kind].append(
                     response.json()
