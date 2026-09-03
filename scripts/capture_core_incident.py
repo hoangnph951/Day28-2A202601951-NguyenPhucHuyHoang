@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-
 from capture_core_evidence import matching_kafka_record, post_after_refill, write
+
 from lab28_platform.settings import Settings
 
 ROOT = Path(__file__).resolve().parents[1]
