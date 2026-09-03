@@ -6,7 +6,7 @@
     "memory": "8gb",
     "storage": "24gb"
   },
-  "postCreateCommand": "python3.11 -m pip install --user --no-cache-dir uv==0.12.9 && $HOME/.local/bin/uv sync --frozen --python 3.11 --extra dev --extra integration --no-editable",
+  "postCreateCommand": "python3 -m pip install --user --no-cache-dir uv==0.12.9 && $HOME/.local/bin/uv sync --frozen --python /usr/bin/python3.12 --extra dev --extra integration --no-editable",
   "forwardPorts": [3000, 5000, 6333, 6566, 6570, 8000, 8080, 9090, 9091, 9901, 16686],
   "portsAttributes": {
     "3000": {
