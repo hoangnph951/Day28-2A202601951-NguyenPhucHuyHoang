@@ -225,6 +225,11 @@ def grafana_evidence(base_url: str) -> dict[str, Any]:
 
 def trace_evidence(base_url: str, trace_id: str) -> dict[str, Any]:
     trace: dict[str, Any] | None = None
+    core_required = {
+        "lab28.gateway.request",
+        "lab28.api.ingest",
+        "lab28.kafka.produce",
+    }
     deadline = time.monotonic() + 30.0
     while time.monotonic() < deadline:
         response = httpx.get(f"{base_url.rstrip('/')}/api/traces/{trace_id}", timeout=10.0)
@@ -235,7 +240,9 @@ def trace_evidence(base_url: str, trace_id: str) -> dict[str, Any]:
         data = response.json().get("data") or []
         if data:
             trace = data[0]
-            break
+            names = {span.get("operationName") for span in trace.get("spans") or []}
+            if core_required <= names:
+                break
         time.sleep(1.0)
     if trace is None:
         raise RuntimeError(f"trace {trace_id} was not exported to Jaeger")
@@ -258,6 +265,7 @@ def trace_evidence(base_url: str, trace_id: str) -> dict[str, Any]:
         "span_names": sorted(name for name in names if name),
         "required_spans_present": sorted(required & names),
         "required_spans_missing": sorted(required - names),
+        "core_trace_verified": core_required <= names,
         "full_matrix_trace_verified": required <= names,
     }
 
