@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/hoangnph951/Day28-2A202601951-NguyenPhucHuyHoang.git
-    targetRevision: main
+    targetRevision: refs/tags/route2-submission
     path: deploy/kubernetes/base
   destination:
     server: https://kubernetes.default.svc

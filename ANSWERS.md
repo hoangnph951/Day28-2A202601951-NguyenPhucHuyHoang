@@ -62,10 +62,10 @@ orchestrator checks rather than treating it as a business endpoint benchmark.
 The checked-in manifests provide two API replicas, startup/readiness/liveness
 probes, non-root execution, read-only root filesystem, dropped capabilities,
 resource requests/limits, HPA, PDB, NetworkPolicy and Gateway API routing.
-Argo CD follows `main` in the submitted repository, enables pruning and
-self-heal, and retains five revisions. A production promotion should replace
-`main` with an immutable signed tag or commit; rollback changes the desired Git
-revision/image and syncs instead of performing an undocumented live edit.
+Argo CD follows the immutable `refs/tags/route2-submission` revision in the
+submitted repository, enables pruning and self-heal, and retains five
+revisions. Rollback changes the desired Git revision/image and syncs instead of
+performing an undocumented live edit.
 
 Static validation is recorded in `evidence/static-validation.txt`. Live drift,
 self-heal and rollback are **not** claimed in route 2 because it has no
