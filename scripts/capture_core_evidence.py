@@ -228,6 +228,9 @@ def trace_evidence(base_url: str, trace_id: str) -> dict[str, Any]:
     deadline = time.monotonic() + 30.0
     while time.monotonic() < deadline:
         response = httpx.get(f"{base_url.rstrip('/')}/api/traces/{trace_id}", timeout=10.0)
+        if response.status_code == 404:
+            time.sleep(1.0)
+            continue
         response.raise_for_status()
         data = response.json().get("data") or []
         if data:

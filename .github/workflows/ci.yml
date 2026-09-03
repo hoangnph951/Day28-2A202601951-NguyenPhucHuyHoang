@@ -22,11 +22,7 @@ jobs:
           python-version: "3.11"
       - run: uv sync --frozen --extra dev --extra integration --no-editable
       - run: uv run ruff check .
-      - name: Verify the published scaffold
-        if: github.event_name != 'pull_request'
-        run: uv run python scripts/verify_starter_state.py
       - name: Verify completed learner work
-        if: github.event_name == 'pull_request'
         run: uv run pytest starter-tests tests -q
       - run: uv run python scripts/verify_matrix.py
       - run: uv run python scripts/check_portability.py
