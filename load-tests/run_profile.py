@@ -6,6 +6,7 @@ import argparse
 import json
 import math
 import time
+import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
@@ -20,6 +21,8 @@ def request(url: str) -> tuple[float, int]:
     try:
         with urllib.request.urlopen(f"{url.rstrip('/')}/ready", timeout=10) as response:
             status = response.status
+    except urllib.error.HTTPError as error:
+        status = error.code
     except Exception:
         status = 0
     return (time.perf_counter() - started) * 1000, status
@@ -31,8 +34,10 @@ def main() -> None:
     parser.add_argument("--requests", type=int, default=100)
     parser.add_argument("--workers", type=int, default=8)
     args = parser.parse_args()
+    started = time.perf_counter()
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         results = list(pool.map(lambda _: request(args.url), range(args.requests)))
+    elapsed = time.perf_counter() - started
     durations = [duration for duration, _ in results]
     statuses: dict[str, int] = {}
     for _, status in results:
@@ -43,6 +48,11 @@ def main() -> None:
                 "requests": args.requests,
                 "workers": args.workers,
                 "status_counts": statuses,
+                "elapsed_seconds": elapsed,
+                "throughput_rps": args.requests / elapsed if elapsed else 0.0,
+                "successful": sum(1 for _, status in results if 200 <= status < 400),
+                "rate_limited": sum(1 for _, status in results if status == 429),
+                "network_errors": sum(1 for _, status in results if status == 0),
                 "latency_ms": {
                     "p50": percentile(durations, 0.50),
                     "p95": percentile(durations, 0.95),
