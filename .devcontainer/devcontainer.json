@@ -8,18 +8,45 @@
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
   "hostRequirements": {
-    "cpus": 2,
+    "cpus": 4,
     "memory": "8gb",
-    "storage": "16gb"
+    "storage": "24gb"
   },
-  "postCreateCommand": "uv sync --python 3.11 --extra dev",
-  "forwardPorts": [8000, 9090],
+  "postCreateCommand": "uv sync --frozen --python 3.11 --extra dev --extra integration --no-editable",
+  "forwardPorts": [3000, 5000, 6333, 6566, 6570, 8000, 8080, 9090, 9091, 9901, 16686],
   "portsAttributes": {
+    "3000": {
+      "label": "Grafana"
+    },
+    "5000": {
+      "label": "MLflow"
+    },
+    "6333": {
+      "label": "Qdrant"
+    },
+    "6566": {
+      "label": "Feast"
+    },
+    "6570": {
+      "label": "Feast metrics"
+    },
     "8000": {
       "label": "Lab 28 API"
     },
+    "8080": {
+      "label": "Lab 28 gateway"
+    },
     "9090": {
       "label": "Prometheus"
+    },
+    "9091": {
+      "label": "Pushgateway"
+    },
+    "9901": {
+      "label": "Envoy admin"
+    },
+    "16686": {
+      "label": "Jaeger"
     }
   },
   "customizations": {
